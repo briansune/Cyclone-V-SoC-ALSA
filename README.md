@@ -64,6 +64,37 @@ HPS -> h2f_usr0_clk (100M)
     };
 ```
 
+## How to introduce to kernel (embedded or module)
+
+To enable the make menuconfig
+
+1) Create folder of your kernel -> /linux/sound/soc/opencore_i2s
+
+2) Copy "opencores_i2s.c" to the folder
+
+3) Create MakeFile & Kconfig
+
+```
+# MakeFile
+# SPDX-License-Identifier: GPL-2.0-only
+obj-$(CONFIG_SND_SOC_OPENCORE_I2S) += opencores_i2s.o
+
+# Kconfig
+# SPDX-License-Identifier: GPL-2.0-only
+config SND_SOC_OPENCORE_I2S
+	tristate "Audio support for the FPSOC I2S"
+	help
+	  Select this option to enable OpenCore I2S.
+```
+
+4) Also add the path to both upper level MakeFile & Kconfig
+
+```
+obj-$(CONFIG_SND_SOC)	+= opencore_i2s/
+
+source "sound/soc/opencore_i2s/Kconfig"
+```
+
 ## Serial Port Log
 
 ```
