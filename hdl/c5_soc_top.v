@@ -360,7 +360,7 @@ module c5_soc_top(
 
 	// Mux capture data
 	assign i2s_output_apb_0_capture_fifo_data = i2s_clkctrl_apb_0_conduit_clk_sel_48_44 ?
-		i2s_capture_fifo_data48 : i2s_capture_fifo_data44;
+		i2s_capture_fifo_data44 : i2s_capture_fifo_data48;
 
 	// Mux out
 	assign iis_dout = i2s_clkctrl_apb_0_conduit_clk_sel_48_44 ? i2s_data_out44 : i2s_data_out48;
