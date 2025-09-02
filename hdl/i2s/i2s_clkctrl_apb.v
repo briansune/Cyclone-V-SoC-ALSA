@@ -68,19 +68,68 @@ module i2s_clkctrl_apb (
 	wire bclk48;
 	wire playback_lrclk48;
 	wire capture_lrclk48;
-	reg sync_reset_48;
-	reg cmd_reg2_wr_sync_48;
-	reg [31:0]		cmd_reg1_sync_48;
-	reg [31:0]		cmd_reg2_sync_48;
-
-	always@(posedge clk_48)
-	begin
-		sync_reset_48 <= reset_n;
-		cmd_reg1_sync_48 <= cmd_reg1;
-		cmd_reg2_sync_48 <= cmd_reg2;
-		cmd_reg2_wr_sync_48 <= cmd_reg2_wr;
-	end
 	
+	// reg sync_reset_48;
+	// reg cmd_reg2_wr_sync_48;
+	// reg [31:0]		cmd_reg1_sync_48;
+	// reg [31:0]		cmd_reg2_sync_48;
+	
+	wire sync_reset_48;
+	wire cmd_reg2_wr_sync_48;
+	wire [31:0]		cmd_reg1_sync_48;
+	wire [31:0]		cmd_reg2_sync_48;
+
+	// always@(posedge clk_48)
+	// begin
+		// sync_reset_48 <= reset_n;
+		// cmd_reg1_sync_48 <= cmd_reg1;
+		// cmd_reg2_sync_48 <= cmd_reg2;
+		// cmd_reg2_wr_sync_48 <= cmd_reg2_wr;
+	// end
+	
+	altera_std_synchronizer#(
+		.depth		(2)
+	)sync_reset_48_cdc(
+		.clk		(clk_48),
+		.reset_n	(1'b1),
+		.din		(reset_n),
+		.dout		(sync_reset_48)
+	);
+	
+	altera_std_synchronizer#(
+		.depth		(2)
+	)cmd_reg2_wr_sync_48_cdc(
+		.clk		(clk_48),
+		.reset_n	(1'b1),
+		.din		(cmd_reg2_wr),
+		.dout		(cmd_reg2_wr_sync_48)
+	);
+	
+	genvar i;
+	
+	generate
+		for(i=0;i<32;i=i+1)begin : cmd_reg1_sync_48_bits
+			altera_std_synchronizer#(
+				.depth		(2)
+			)cmd_reg1_sync_48_cdc(
+				.clk		(clk_48),
+				.reset_n	(1'b1),
+				.din		(cmd_reg1[i]),
+				.dout		(cmd_reg1_sync_48[i])
+			);
+		end
+		
+		for(i=0;i<32;i=i+1)begin : cmd_reg2_sync_48_bits
+			altera_std_synchronizer#(
+				.depth		(2)
+			)cmd_reg1_sync_48_cdc(
+				.clk		(clk_48),
+				.reset_n	(1'b1),
+				.din		(cmd_reg2[i]),
+				.dout		(cmd_reg2_sync_48[i])
+			);
+		end
+	endgenerate
 	
 	audio_clock_generator playback_gen48 (
 		.clk		(clk_48),
@@ -97,18 +146,67 @@ module i2s_clkctrl_apb (
 	wire bclk44;
 	wire playback_lrclk44;
 	wire capture_lrclk44;
-	reg sync_reset_44;
-	reg cmd_reg2_wr_sync_44;
-	reg [31:0]		cmd_reg1_sync_44;
-	reg [31:0]		cmd_reg2_sync_44;
 	
-	always@(posedge clk_44)
-	begin
-		sync_reset_44 <= reset_n;
-		cmd_reg1_sync_44 <= cmd_reg1;
-		cmd_reg2_sync_44 <= cmd_reg2;
-		cmd_reg2_wr_sync_44 <= cmd_reg2_wr;
-	end
+	// reg sync_reset_44;
+	// reg cmd_reg2_wr_sync_44;
+	// reg [31:0]		cmd_reg1_sync_44;
+	// reg [31:0]		cmd_reg2_sync_44;
+	
+	wire sync_reset_44;
+	wire cmd_reg2_wr_sync_44;
+	wire [31:0]		cmd_reg1_sync_44;
+	wire [31:0]		cmd_reg2_sync_44;
+	
+	// always@(posedge clk_44)
+	// begin
+		// sync_reset_44 <= reset_n;
+		// cmd_reg1_sync_44 <= cmd_reg1;
+		// cmd_reg2_sync_44 <= cmd_reg2;
+		// cmd_reg2_wr_sync_44 <= cmd_reg2_wr;
+	// end
+	
+	altera_std_synchronizer#(
+		.depth		(2)
+	)sync_reset_44_cdc(
+		.clk		(clk_44),
+		.reset_n	(1'b1),
+		.din		(reset_n),
+		.dout		(sync_reset_44)
+	);
+	
+	altera_std_synchronizer#(
+		.depth		(2)
+	)cmd_reg2_wr_sync_44_cdc(
+		.clk		(clk_44),
+		.reset_n	(1'b1),
+		.din		(cmd_reg2_wr),
+		.dout		(cmd_reg2_wr_sync_44)
+	);
+	
+	generate
+		for(i=0;i<32;i=i+1)begin : cmd_reg1_sync_44_bits
+			altera_std_synchronizer#(
+				.depth		(2)
+			)cmd_reg1_sync_44_cdc(
+				.clk		(clk_44),
+				.reset_n	(1'b1),
+				.din		(cmd_reg1[i]),
+				.dout		(cmd_reg1_sync_44[i])
+			);
+		end
+		
+		for(i=0;i<32;i=i+1)begin : cmd_reg2_sync_44_bits
+			altera_std_synchronizer#(
+				.depth		(2)
+			)cmd_reg1_sync_44_cdc(
+				.clk		(clk_44),
+				.reset_n	(1'b1),
+				.din		(cmd_reg2[i]),
+				.dout		(cmd_reg2_sync_44[i])
+			);
+		end
+	endgenerate
+	
 	audio_clock_generator playback_gen44 (
 		.clk		(clk_44),
 		.reset_n	(sync_reset_44),

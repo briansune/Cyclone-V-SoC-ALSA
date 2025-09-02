@@ -1,5 +1,10 @@
 # Cyclone-V-SoC-ALSA
 
+## Update Logs
+
+1.0.0 - Initial release
+1.0.1 - Introduce proper CDC
+
 ## This IIS audio driver is based on:
 
 1) https://github.com/bsteinsbo/DE1-SoC-Sound/blob/master/drivers/opencores_i2s.c
