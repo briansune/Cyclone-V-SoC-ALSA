@@ -1,7 +1,8 @@
 /*
- * Copyright (C) 2025 Brian Sune <briansune@gmail.com>
- * Largely based on axi-i2s.c by Lars-Peter Clausen.
- * Largely based on axi-i2s.c by Lars-Peter Clausen.
+ * Copyright (C) as below editors
+ * Reported 2025 by Brian Sune <briansune@gmail.com>
+ * Report 2014 by Bjarne Steinsbo <bsteinsbo@gmail.com>
+ * Initial released by Lars-Peter Clausen.
  *
  * Licensed under the GPL-2.
  */
@@ -52,9 +53,9 @@
 #define BITS_PER_FRAME 64
 
 /* Module parameter to set master or slave mode */
-static int master_mode = 1;
-module_param(master_mode, int, 0644);
-MODULE_PARM_DESC(master_mode, "Set I2S as master (1) or slave (0) on init");
+//static int master_mode = 1;
+//module_param(master_mode, int, 0644);
+//MODULE_PARM_DESC(master_mode, "Set I2S as master (1) or slave (0) on init");
 
 struct opencores_i2s {
 	struct regmap *regmap_data;
@@ -69,6 +70,8 @@ struct opencores_i2s {
 
 	struct snd_ratnum ratnum;
 	struct snd_pcm_hw_constraint_ratnums rate_constraints;
+
+	bool master_mode;  /* Master if true, slave if false */
 };
 
 static int opencores_i2s_trigger(struct snd_pcm_substream *substream, int cmd,
@@ -120,15 +123,17 @@ static int opencores_i2s_hw_params(struct snd_pcm_substream *substream,
 	int mask, val;
 	int mask2, val2;
 
-	dev_dbg(dai->dev, "hw_params fmt=0x%x\n", params_format(params));
-	dev_dbg(dai->dev, "hw_params rate=%d\n", params_rate(params));
-	if (params_format(params) != SNDRV_PCM_FORMAT_S32_LE)
+	dev_info(dai->dev, "hw_params fmt=0x%x\n", params_format(params));
+	dev_info(dai->dev, "hw_params rate=%d\n", params_rate(params));
+	if (params_format(params) != SNDRV_PCM_FORMAT_S24_LE &&
+		params_format(params) != SNDRV_PCM_FORMAT_S32_LE)
 		return -EINVAL;
 	
 	if ((params_rate(params) % 44100) == 0) {
 		val = CLK_SEL_48_44;
 		xtal_rate = clk_get_rate(i2s->clk44);
-		mclk_div = divisor_value(xtal_rate, 16934400, 0); /* fs*384 at 44.1kHz */
+		mclk_div = divisor_value(xtal_rate, 11289600, 0); /* fs*256 at 44.1kHz */
+//		mclk_div = divisor_value(xtal_rate, 16934400, 0); /* fs*384 at 44.1kHz */
 	} else if ((params_rate(params) % 48000) == 0) {
 		val = 0;
 		xtal_rate = clk_get_rate(i2s->clk48);
@@ -148,9 +153,9 @@ static int opencores_i2s_hw_params(struct snd_pcm_substream *substream,
 	val |= bclk_div << BCLK_DIV_SHIFT;
 	mask |= BCLK_DIV_MASK;
 	// ==========================================
-	// force to master / slave here
+	// Fixed - 2025/10/01
 	// ==========================================	
-	val |= ((master_mode) ? CLK_MASTER_SLAVE : 0);
+	val |= ((i2s->master_mode) ? CLK_MASTER_SLAVE : 0);
 	mask |= CLK_MASTER_SLAVE;
 	// ==========================================
 	regmap_update_bits(i2s->regmap_clk, CLK_CTRL1, mask, val);
@@ -179,20 +184,22 @@ static int opencores_i2s_set_fmt(struct snd_soc_dai *dai, unsigned int fmt)
 	if ((fmt & SND_SOC_DAIFMT_INV_MASK) != SND_SOC_DAIFMT_NB_NF)
 		return -EINVAL;
 
-	switch (fmt & SND_SOC_DAIFMT_MASTER_MASK) {
-	case SND_SOC_DAIFMT_CBM_CFM: // codec master, FPGA slave
-		val = 0;
-		break;
-	case SND_SOC_DAIFMT_CBS_CFS: // codec slave, FPGA master
-		val = 1;
-		break;
-	default:
-		return -EINVAL;
+	switch (fmt & SND_SOC_DAIFMT_CLOCK_PROVIDER_MASK) {
+		// codec slave, FPGA master
+		case SND_SOC_DAIFMT_CBP_CFP:
+			val = 1;
+			i2s->master_mode = 1;
+			break;
+		// codec master, FPGA slave
+		case SND_SOC_DAIFMT_CBC_CFC:
+			val = 0;
+			i2s->master_mode = 0;
+			break;
+		default:
+			return -EINVAL;
 	}
 
-	dev_dbg(dai->dev, "set_fmt master=%d\n", val);
-
-	// Update master/slave bit
+	dev_info(dai->dev, "set_fmt master=%d\n", val);
 
 	// If setting master mode, initialize safe default clock dividers
 	if (val == 1) {
@@ -283,7 +290,7 @@ static const struct snd_soc_dai_ops opencores_i2s_dai_ops = {
 };
 
 static struct snd_soc_dai_driver opencores_i2s_dai = {
-//	.probe = opencores_i2s_dai_probe,
+
 	.name = "opencores-i2s",
 	.playback = {
 		.channels_min = 2,
@@ -299,7 +306,7 @@ static struct snd_soc_dai_driver opencores_i2s_dai = {
 		.rates = SNDRV_PCM_RATE_44100 | SNDRV_PCM_RATE_48000
 			| SNDRV_PCM_RATE_88200 | SNDRV_PCM_RATE_96000
 			| SNDRV_PCM_RATE_176400 | SNDRV_PCM_RATE_192000,
-		.formats = SNDRV_PCM_FMTBIT_S32_LE,
+		.formats = SNDRV_PCM_FMTBIT_S24_LE | SNDRV_PCM_FMTBIT_S32_LE,
 	},
 	.ops = &opencores_i2s_dai_ops,
 	.symmetric_rate = 1,
@@ -424,6 +431,9 @@ static int opencores_i2s_probe(struct platform_device *pdev)
 	i2s->rate_constraints.rats = &i2s->ratnum;
 	i2s->rate_constraints.nrats = 1;
 */
+
+	regmap_update_bits(i2s->regmap_clk, CLK_CTRL1, CLK_MASTER_SLAVE,
+                   i2s->master_mode ? CLK_MASTER_SLAVE : 0);
 	
 	regmap_write(i2s->regmap_data, CMD_ADDR, PB_FIFO_CLEAR | CAP_FIFO_CLEAR);
 	ret = regmap_read(i2s->regmap_data, STATUS_ADDR, &signature);
@@ -475,3 +485,5 @@ module_platform_driver(opencores_i2s_driver);
 MODULE_AUTHOR("Brian Sune <briansune@gmail.com>");
 MODULE_DESCRIPTION("I2S driver for core Cyclone V SoC");
 MODULE_LICENSE("GPL");
+MODULE_SOFTDEP("pre: dma-pl330");
+
