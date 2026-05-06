@@ -41,36 +41,36 @@ set_fileset_property QUARTUS_SYNTH TOP_LEVEL i2s_core_wrapper
 set_fileset_property QUARTUS_SYNTH ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property QUARTUS_SYNTH ENABLE_FILE_OVERWRITE_MODE false
 add_fileset_file i2s_core_wrapper.v VERILOG PATH i2s_core_wrapper.v TOP_LEVEL_FILE
-add_fileset_file capture_fifo.qip OTHER PATH capture_fifo.qip
-add_fileset_file capture_fifo.v VERILOG PATH capture_fifo.v
+# add_fileset_file capture_fifo.qip OTHER PATH capture_fifo.qip
+# add_fileset_file capture_fifo.v VERILOG PATH capture_fifo.v
 add_fileset_file i2s_clkctrl_apb.v VERILOG PATH i2s_clkctrl_apb.v
 add_fileset_file i2s_output_apb.v VERILOG PATH i2s_output_apb.v
-add_fileset_file playback_fifo.qip OTHER PATH playback_fifo.qip
-add_fileset_file playback_fifo.v VERILOG PATH playback_fifo.v
+# add_fileset_file playback_fifo.qip OTHER PATH playback_fifo.qip
+# add_fileset_file playback_fifo.v VERILOG PATH playback_fifo.v
 
 add_fileset SIM_VERILOG SIM_VERILOG "" ""
 set_fileset_property SIM_VERILOG TOP_LEVEL i2s_core_wrapper
 set_fileset_property SIM_VERILOG ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VERILOG ENABLE_FILE_OVERWRITE_MODE false
 add_fileset_file i2s_core_wrapper.v VERILOG PATH i2s_core_wrapper.v
-add_fileset_file capture_fifo.qip OTHER PATH capture_fifo.qip
-add_fileset_file capture_fifo.v VERILOG PATH capture_fifo.v
+# add_fileset_file capture_fifo.qip OTHER PATH capture_fifo.qip
+# add_fileset_file capture_fifo.v VERILOG PATH capture_fifo.v
 add_fileset_file i2s_clkctrl_apb.v VERILOG PATH i2s_clkctrl_apb.v
 add_fileset_file i2s_output_apb.v VERILOG PATH i2s_output_apb.v
-add_fileset_file playback_fifo.qip OTHER PATH playback_fifo.qip
-add_fileset_file playback_fifo.v VERILOG PATH playback_fifo.v
+# add_fileset_file playback_fifo.qip OTHER PATH playback_fifo.qip
+# add_fileset_file playback_fifo.v VERILOG PATH playback_fifo.v
 
 add_fileset SIM_VHDL SIM_VHDL "" ""
 set_fileset_property SIM_VHDL TOP_LEVEL i2s_core_wrapper
 set_fileset_property SIM_VHDL ENABLE_RELATIVE_INCLUDE_PATHS false
 set_fileset_property SIM_VHDL ENABLE_FILE_OVERWRITE_MODE false
 add_fileset_file i2s_core_wrapper.v VERILOG PATH i2s_core_wrapper.v
-add_fileset_file capture_fifo.qip OTHER PATH capture_fifo.qip
-add_fileset_file capture_fifo.v VERILOG PATH capture_fifo.v
+# add_fileset_file capture_fifo.qip OTHER PATH capture_fifo.qip
+# add_fileset_file capture_fifo.v VERILOG PATH capture_fifo.v
 add_fileset_file i2s_clkctrl_apb.v VERILOG PATH i2s_clkctrl_apb.v
 add_fileset_file i2s_output_apb.v VERILOG PATH i2s_output_apb.v
-add_fileset_file playback_fifo.qip OTHER PATH playback_fifo.qip
-add_fileset_file playback_fifo.v VERILOG PATH playback_fifo.v
+# add_fileset_file playback_fifo.qip OTHER PATH playback_fifo.qip
+# add_fileset_file playback_fifo.v VERILOG PATH playback_fifo.v
 
 
 # 

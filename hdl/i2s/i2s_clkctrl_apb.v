@@ -302,7 +302,7 @@ module clk_divider #(parameter N = 8) (
 				q <= ~q;
 			end
 			else
-				counter <= counter + 1;
+				counter <= counter + 1'b1;
 		end
 	end
 endmodule

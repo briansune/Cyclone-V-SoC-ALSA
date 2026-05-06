@@ -36,14 +36,14 @@ module i2s_output_apb (
 	reg		[31:0]	wr_fifo_data;
 	wire			wr_fifo_empty;
 	wire			wr_fifo_full;
-	wire	[3:0]	wr_fifo_used;
+	wire	[4:0]	wr_fifo_used;
 
 	wire			rd_fifo_read;
 	wire			rd_fifo_clear;
 	wire	[31:0]	rd_fifo_data;
 	wire			rd_fifo_empty;
 	wire			rd_fifo_full;
-	wire	[3:0]	rd_fifo_used;
+	wire	[4:0]	rd_fifo_used;
 
 	reg		[31:0]	cmd_reg;
 	reg		[31:0]	sts_reg;
@@ -153,34 +153,101 @@ module i2s_output_apb (
 	assign pready = penable; // always ready (no wait states)
 
 
-	playback_fifo	playback_fifo_inst (
-		.wrclk		(clk),
-		.wrreq		(wr_fifo_write),
-		.data		(wr_fifo_data),
-		.aclr		(wr_fifo_clear),
-		.wrempty	(wr_fifo_empty),
-		.wrfull		(wr_fifo_full),
-		.wrusedw	(wr_fifo_used),
-		.rdclk		(playback_fifo_clk),
-		.rdreq		(playback_fifo_read),
-		.q			(playback_fifo_data),
-		.rdempty	(playback_fifo_empty),
-		.rdfull		(playback_fifo_full),
-		.rdusedw	()
+	// playback_fifo	playback_fifo_inst (
+		// .wrclk		(clk),
+		// .wrreq		(wr_fifo_write),
+		// .data		(wr_fifo_data),
+		// .aclr		(wr_fifo_clear),
+		// .wrempty	(wr_fifo_empty),
+		// .wrfull		(wr_fifo_full),
+		// .wrusedw	(wr_fifo_used),
+		// .rdclk		(playback_fifo_clk),
+		// .rdreq		(playback_fifo_read),
+		// .q			(playback_fifo_data),
+		// .rdempty	(playback_fifo_empty),
+		// .rdfull		(playback_fifo_full),
+		// .rdusedw	()
+	// );
+	
+	dcfifo_mixed_widths	playback_fifo_inst(
+		.wrclk (clk),
+		.wrreq (wr_fifo_write),
+		.data (wr_fifo_data),
+		.aclr (wr_fifo_clear),
+		.wrempty (wr_fifo_empty),
+		.wrfull (wr_fifo_full),
+		.wrusedw (wr_fifo_used),
+		.rdclk (playback_fifo_clk),
+		.rdreq (playback_fifo_read),
+		.q (playback_fifo_data),
+		.rdempty (playback_fifo_empty),
+		.rdfull (playback_fifo_full),
+		.rdusedw (),
+		.eccstatus ()
 	);
-	capture_fifo	capture_fifo_inst (
-		.wrclk			(capture_fifo_clk),
-		.wrreq			(capture_fifo_write),
-		.data			(capture_fifo_data),
-		.aclr			(rd_fifo_clear),
-		.wrempty		(capture_fifo_empty),
-		.wrfull			(capture_fifo_full),
-		.rdclk			(clk),
-		.rdreq			(rd_fifo_read),
-		.q				(rd_fifo_data),
-		.rdempty		(rd_fifo_empty),
-		.rdfull			(rd_fifo_full),
-		.rdusedw		(rd_fifo_used)
+	defparam
+		playback_fifo_inst.intended_device_family = "Cyclone V",
+		playback_fifo_inst.lpm_numwords = 32,
+		playback_fifo_inst.lpm_showahead = "ON",
+		playback_fifo_inst.lpm_type = "dcfifo_mixed_widths",
+		playback_fifo_inst.lpm_width = 32,
+		playback_fifo_inst.lpm_widthu = 5,
+		playback_fifo_inst.lpm_widthu_r = 4,
+		playback_fifo_inst.lpm_width_r = 64,
+		playback_fifo_inst.overflow_checking = "OFF",
+		playback_fifo_inst.rdsync_delaypipe = 4,
+		playback_fifo_inst.read_aclr_synch = "OFF",
+		playback_fifo_inst.underflow_checking = "OFF",
+		playback_fifo_inst.use_eab = "ON",
+		playback_fifo_inst.write_aclr_synch = "ON",
+		playback_fifo_inst.wrsync_delaypipe = 4;
+	
+	// capture_fifo	capture_fifo_inst (
+		// .wrclk			(capture_fifo_clk),
+		// .wrreq			(capture_fifo_write),
+		// .data			(capture_fifo_data),
+		// .aclr			(rd_fifo_clear),
+		// .wrempty		(capture_fifo_empty),
+		// .wrfull			(capture_fifo_full),
+		// .rdclk			(clk),
+		// .rdreq			(rd_fifo_read),
+		// .q				(rd_fifo_data),
+		// .rdempty		(rd_fifo_empty),
+		// .rdfull			(rd_fifo_full),
+		// .rdusedw		(rd_fifo_used)
+	// );
+	
+	dcfifo_mixed_widths	capture_fifo_inst (
+		.wrclk		(capture_fifo_clk),
+		.wrreq		(capture_fifo_write),
+		.data		(capture_fifo_data),
+		.aclr		(rd_fifo_clear),
+		.wrempty	(capture_fifo_empty),
+		.wrfull		(capture_fifo_full),
+		.wrusedw	(),
+		.rdclk		(clk),
+		.rdreq		(rd_fifo_read),
+		.q			(rd_fifo_data),
+		.rdempty	(rd_fifo_empty),
+		.rdfull		(rd_fifo_full),
+		.rdusedw	(rd_fifo_used),
+		.eccstatus	()
 	);
+	defparam
+		capture_fifo_inst.intended_device_family = "Cyclone V",
+		capture_fifo_inst.lpm_numwords = 16,
+		capture_fifo_inst.lpm_showahead = "ON",
+		capture_fifo_inst.lpm_type = "dcfifo_mixed_widths",
+		capture_fifo_inst.lpm_width = 64,
+		capture_fifo_inst.lpm_widthu = 4,
+		capture_fifo_inst.lpm_widthu_r = 5,
+		capture_fifo_inst.lpm_width_r = 32,
+		capture_fifo_inst.overflow_checking = "OFF",
+		capture_fifo_inst.rdsync_delaypipe = 4,
+		capture_fifo_inst.read_aclr_synch = "ON",
+		capture_fifo_inst.underflow_checking = "OFF",
+		capture_fifo_inst.use_eab = "ON",
+		capture_fifo_inst.write_aclr_synch = "OFF",
+		capture_fifo_inst.wrsync_delaypipe = 4;
 
 endmodule
